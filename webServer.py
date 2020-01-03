@@ -137,7 +137,7 @@ class WebServer:
                             try:
                                 exec(run, globals(), locals())
                             except Exception as e:
-                                 log_msg(1,ellipsis)
+                                 log_msg(1,e)
                         conn.send(c.encode())
                 elif len(b) > 0:
                     conn.send(b.encode())
