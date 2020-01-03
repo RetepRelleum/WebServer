@@ -134,7 +134,10 @@ class WebServer:
                             conn.send(str(wup).encode())
                         if 'exec' in b:
                             log_msg(1,"exec String:",run)
-                            exec(run, globals(), locals())
+                            try:
+                                exec(run, globals(), locals())
+                            except Exception as e:
+                                 log_msg(1,ellipsis)
                         conn.send(c.encode())
                 elif len(b) > 0:
                     conn.send(b.encode())
