@@ -119,15 +119,22 @@ class WebServer:
                     conn.send(c)
                     if 'eval' in b:
                         c = b[b.find('eval')+4:]
+                    if 'exec' in b:
+                        c = b[b.find('exec')+4:]
                     if '=' in c:
                         c = c[c.find('=')+1:]
-                    if c.find(c.strip()[0]) == 1:
+                    if c.find(c.strip()[0]) == 0:
                         h = c.strip()[0]
                         c = c[c.find(h)+1:]
                         run = c[:c.find(h)]
                         c = c[c.find("/>")+2:]
-                        wup = eval(run, globals(), locals())
-                        conn.send(str(wup).encode())
+                        if 'eval' in b:
+                            log_msg(1,"eval String:",run)
+                            wup = eval(run, globals(), locals())
+                            conn.send(str(wup).encode())
+                        if 'exec' in b:
+                            log_msg(1,"exec String:",run)
+                            exec(run, globals(), locals())
                         conn.send(c.encode())
                 elif len(b) > 0:
                     conn.send(b.encode())
