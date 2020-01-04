@@ -8,26 +8,13 @@ import _thread
 log_level = 4
 
 
-class Wupy:
-    """ Class for calling Python statements via the URL http: //esp32.home/wupy?prints("Hello world")
-        """
-
-    def prints(self, a):
-    
-
-        return a
-
-
-wupy = Wupy()
-
-
 class WebServer:
 
     """ Web server for Micropython and Python 3.7 with support for the execution of Python code
-    -> 1 the call http://esp32.home/wupy?Prints("hello world") returns hello world.
-            Only functions of the Wupy class can be called.
-    -> 2 in the called html document the mark <wupy eval = 'xxx' /> is replaced by the return value.
-            xxx is any python expression.
+    -> 1 the call http://esp32.home/eval?8/4 returns 2.
+    -> 2 the call http://esp32.home/exec?print('hallo') prints hallo in the stdout.
+    -> 3 in the called html document the mark <wupy eval = 'xxx' /> is replaced by the return value. xxx is any python expression.
+    -> 4 in the called html document the mark <wupy exec = 'xxx' /> is replaced by ''''. xxx is any python expression.
     """
 
     _mimeTypes = {
@@ -74,7 +61,8 @@ class WebServer:
         self._path = self.webroot+req[0].partition("?")[0]
         self._arg = req[0].partition("?")[2]
         self._mime = self._path[self._path.rfind(".")+1:len(self._path)]
-        self._filename = self._path[self._path.rfind("/")+1:self._path.rfind(".")]
+        self._filename = self._path[self._path.rfind(
+            "/")+1:self._path.rfind(".")]
         if self._filename == "":
             self._filename = "index"
             self._mime = "html"
@@ -114,7 +102,7 @@ class WebServer:
             a = True
             while a:
                 b = file.readline()
-                if '<wupy' in b: 
+                if '<wupy' in b:
                     c = b[0:b.find('<wupy')].encode()
                     conn.send(c)
                     if 'eval' in b:
@@ -129,15 +117,20 @@ class WebServer:
                         run = c[:c.find(h)]
                         c = c[c.find("/>")+2:]
                         if 'eval' in b:
-                            log_msg(1,"eval String:",run)
-                            wup = eval(run, globals(), locals())
-                            conn.send(str(wup).encode())
+                            log_msg(1, "eval String:", run)
+                            try:
+                                wup = eval(run, globals(), locals())
+                                conn.send(str(wup).encode())
+                            except Exception as e:
+                                log_msg(1, str(e))
+                            
                         if 'exec' in b:
-                            log_msg(1,"exec String:",run)
+                            run = run.replace("\\n", "\n")
+                            log_msg(1, "exec String:", run)
                             try:
                                 exec(run, globals(), locals())
                             except Exception as e:
-                                 log_msg(1,e)
+                                log_msg(1, str(e))
                         conn.send(c.encode())
                 elif len(b) > 0:
                     conn.send(b.encode())
@@ -149,14 +142,22 @@ class WebServer:
             conn.send('fiel not found')
         conn.close()
 
-    def _executeRequest(self, arg, conn):
+    def _execRequest(self, arg, conn):
         arg = arg.replace("%20", " ")
         arg = arg.replace("%22", "'")
-
-        g = 'wupy.'+arg
+        g = arg
         try:
-            exec(g)
-            conn.send(str(eval(g)).encode())
+            conn.send(str(exec(g,globals(),locals())).encode())
+        except Exception as e:
+            conn.send("object has no attribute "+arg)
+        conn.close()
+
+    def _evalRequest(self, arg, conn):
+        arg = arg.replace("%20", " ")
+        arg = arg.replace("%22", "'")
+        g = arg
+        try:
+            conn.send(str(eval(g,globals(),locals())).encode())
         except Exception as e:
             conn.send("object has no attribute "+arg)
         conn.close()
@@ -177,13 +178,16 @@ class WebServer:
                 log_msg(1, s)
                 conn.send(s.encode())
                 conn.send(b'Connection: close\n\n')
-                if self._filename.lower() == "wup":
-                    self._executeRequest(self._arg, conn)
+                if self._filename.lower() == "exe":
+                    self._execRequest(self._arg, conn)
+                if self._filename.lower() == "eva":
+                    self._evalRequest(self._arg, conn)
                 elif self._mime.lower() in {"html", "htm"}:
                     _thread.start_new_thread(
                         self._sendFileWupy, (self._path, conn))
                 else:
-                    _thread.start_new_thread(self._sendFile, (self._path, conn))
+                    _thread.start_new_thread(
+                        self._sendFile, (self._path, conn))
             except Exception as e:
                 sys.print_exception(e)
                 conn.close()
