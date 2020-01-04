@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <style>
+        table,
+        th,
+        td {
+            border: 1px solid rgb(0, 0, 0);
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 5px;
+        }
+
+        th {
+            text-align: left;
+        }
+    </style>
+    <title>ESP32</title>
+</head>
+
+<body>
+    <script>
+
+        $(document).ready(function () {
+            $.get("exec?import datetime", function (data, status) {
+            });
+            $("button").click(function () {
+                $.get("eval?datetime.datetime.now()", function (data, status) {
+                    alert("Data: " + data + "\nStatus: " + status);
+                });
+            });
+        });
+    </script>
+
+    <button>led on at ESP32 lolin pro</button>
+
+    <h1>System Information</h1>
+    <table>
+        <tr>
+            <th>A mutable list of arguments the current program was started with</th>
+            <th>
+                <wupy eval="sys.argv" />
+            </th>
+        </tr>
+        <tr>
+            <th>The byte order of the system ("little" or "big")</th>
+            <th>
+                <wupy eval="sys.byteorder" />
+            </th>
+        </tr>
+        <tr>
+            <th>Information about the current Python implementation</th>
+            <th>
+                <wupy eval="sys.implementation" />
+            </th>
+        </tr>
+        <tr>
+            <th>Maximum value which a native integer type can hold on </th>
+            <th>
+                <wupy eval="sys.maxsize" />
+            </th>
+        </tr>
+        <tr>
+            <th>Dictionary of loaded modules</th>
+            <th>
+                <wupy eval="sys.modules" />
+            </th>
+        </tr>
+        <tr>
+            <th>A mutable list of directories to search for imported modules</th>
+            <th>
+                <wupy eval="sys.path" />
+            </th>
+        </tr>
+        <tr>
+            <th>The platform that MicroPython is running on </th>
+            <th>
+                <wupy eval="sys.platform" />
+            </th>
+        </tr>
+        <tr>
+            <th>Python language version that this implementation conforms to</th>
+            <th>
+                <wupy eval="sys.version" />
+            </th>
+        </tr>
+        <tr>
+            <th>Python language version that this implementation conforms to</th>
+            <th>
+                <wupy eval="sys.version_info" />
+            </th>
+        </tr>
+        <tr>
+            <th>Python language version that this implementation conforms to</th>
+            <th>
+                <wupy eval="sys.version" />
+            </th>
+        </tr>
+    </table>
+
+
+
+    <h1>operating system</h1>
+    <table>
+        <tr>
+            <th>Information about the underlying machine and/or its operating system</th>
+            <th>
+                <wupy eval="os.uname()" />
+            </th>
+        </tr>
+        <tr>
+            <th>Get the current directory.</th>
+            <th>
+                <wupy eval="os.getcwd()" />
+            </th>
+        </tr>
+    </table>
+
+    <h1>time related functions</h1>
+    <table>
+        <tr>
+            <th>Convert a time expressed in seconds since the Epoch</th>
+            <th>
+                <wupy eval="time.localtime()" />
+            </th>
+        </tr>
+        <tr>
+            <th>The number of seconds, as an integer, since the Epoch</th>
+            <th>
+                <wupy eval="time.time()" />
+            </th>
+        </tr>
+    </table>
+
+
+
+
+
+
+
+
+</body>
+
+</html>

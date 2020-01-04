@@ -45,6 +45,8 @@ class WebServer:
         "zip":   "application/zip"}
 
     def __init__(self, port=80, webroot="sd/webroot"):
+        self.loc=locals()
+        self.glob=globals()
         self.webroot = webroot
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.s.bind(('', port))
@@ -93,7 +95,7 @@ class WebServer:
             file.close()
             conn.close()
         except Exception as e:
-            conn.send('fiel not found')
+            conn.send(b'fiel not found')
         conn.close()
 
     def _sendFileWupy(self, path, conn):
@@ -119,7 +121,7 @@ class WebServer:
                         if 'eval' in b:
                             log_msg(1, "eval String:", run)
                             try:
-                                wup = eval(run, globals(), locals())
+                                wup = eval(run,self.glob, self.loc)
                                 conn.send(str(wup).encode())
                             except Exception as e:
                                 log_msg(1, str(e))
@@ -128,7 +130,7 @@ class WebServer:
                             run = run.replace("\\n", "\n")
                             log_msg(1, "exec String:", run)
                             try:
-                                exec(run, globals(), locals())
+                                exec(run,self.glob, self.loc)
                             except Exception as e:
                                 log_msg(1, str(e))
                         conn.send(c.encode())
@@ -139,7 +141,7 @@ class WebServer:
             file.close()
             conn.close()
         except Exception as e:
-            conn.send('fiel not found')
+            conn.send(b'fiel not found')
         conn.close()
 
     def _execRequest(self, arg, conn):
@@ -147,7 +149,7 @@ class WebServer:
         arg = arg.replace("%22", "'")
         g = arg
         try:
-            conn.send(str(exec(g,globals(),locals())).encode())
+            conn.send(str(exec(g,self.glob, self.loc)).encode())
         except Exception as e:
             conn.send("object has no attribute "+arg)
         conn.close()
@@ -157,9 +159,10 @@ class WebServer:
         arg = arg.replace("%22", "'")
         g = arg
         try:
-            conn.send(str(eval(g,globals(),locals())).encode())
+            conn.send(str(eval(g,self.glob, self.loc)).encode())
         except Exception as e:
-            conn.send("object has no attribute "+arg)
+            a="object has no attribute "+arg
+            conn.send(a.encode())
         conn.close()
 
     def _run(self):
@@ -180,7 +183,7 @@ class WebServer:
                 conn.send(b'Connection: close\n\n')
                 if self._filename.lower() == "exe":
                     self._execRequest(self._arg, conn)
-                if self._filename.lower() == "eva":
+                elif self._filename.lower() == "eva":
                     self._evalRequest(self._arg, conn)
                 elif self._mime.lower() in {"html", "htm"}:
                     _thread.start_new_thread(
@@ -189,7 +192,7 @@ class WebServer:
                     _thread.start_new_thread(
                         self._sendFile, (self._path, conn))
             except Exception as e:
-                sys.print_exception(e)
+                log_msg(1,e)
                 conn.close()
         else:
             conn.close()
