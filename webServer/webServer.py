@@ -44,7 +44,7 @@ class WebServer:
         "xml":   "application/xml",
         "zip":   "application/zip"}
 
-    def __init__(self,webroot="sd/webroot",port=80):
+    def __init__(self,webroot="/",port=80):
         self.loc=locals()
         self.glob=globals()
         self.webroot = webroot
