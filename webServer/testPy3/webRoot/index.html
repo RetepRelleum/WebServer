@@ -25,12 +25,13 @@
 
 <body>
     <script>
-
         $(document).ready(function () {
-            $.get("exec?import datetime", function (data, status) {
+            $.get("exec?import machine", function (data, status) {
+            });
+            $.get("exec?rtc = machine.RTC()", function (data, status) {
             });
             $("button").click(function () {
-                $.get("eval?datetime.datetime.now()", function (data, status) {
+                $.get("eval?rtc.datetime()", function (data, status) {
                     alert("Data: " + data + "\nStatus: " + status);
                 });
             });
